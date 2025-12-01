@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Reyes - Inferno</title>
+
+<style>
+    body {
+        margin: 0;
+        font-family: Arial, sans-serif;
+        background: #e4eef5;
+        overflow: hidden;
+    }
+
+    #sidePanel1 p, #sidePanel2 p{
+        text-align: justify;
+    }
+
+    #mapWrapper {
+        width: 100%;
+        height: 100vh;
+        overflow-y: scroll;
+        scroll-behavior: smooth;
+        margin-top: 70px;
+    }
+
+    .layer {
+        width: 100%;
+        height: 500px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: 0.3s;
+        background: #600202;
+    }
+
+.layer.hovered {
+  background: black !important;
+  color: white;                
+}
+
+    .layer-title {
+        font-size: 28px;
+        font-weight: bold;
+        background: rgba(255,255,255,0.8);
+        padding: 12px 25px;
+        font-family: "Baskerville Old Face"; font-size: 34px; font-variant: small-caps; font-weight: 700; line-height: 15.4px;
+        color:darkred;
+        transition: all 0.4s ease;
+    }
+
+    .layer-title:hover{
+        scale: 2;
+        background: #590202;
+        color: white;
+    }
+
+#sidePanel1 {
+    width: 380px;
+    height: 100vh;
+    background: white;
+    position: fixed;
+    top: 0;
+    left: -600px;
+    visibility: hidden;
+    transition: 0.4s ease;
+    padding: 20px;
+    box-shadow: 3px 0 15px rgba(0,0,0,0.25);
+    overflow-y: auto;
+    z-index: 20;
+}
+
+#sidePanel1.open {
+    left: 0px;
+    visibility: visible;
+}
+
+#sidePanel2 {
+    width: 350px;
+    height: 100vh;
+    background: #f2f2f2;
+    position: fixed;
+    top: 0;
+    left: -360px;
+    visibility: hidden;      
+    transition: 0.4s ease;
+    padding: 20px;
+    box-shadow: 3px 0 12px rgba(0,0,0,0.25);
+    overflow-y: auto;
+    z-index: 30;
+    justify-content: center;
+}
+
+#sidePanel2.open {
+    left: 420px;
+    visibility: visible;
+}
+
+
+    .close-btn {
+        background: #900;
+        color: #fff;
+        border: none;
+        padding: 8px 12px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 1rem;
+        float: right;
+    }
+
+    .sub-btn {
+        width: 100%;
+        padding: 12px;
+        margin: 12px 0;
+        background: #ddd;
+        border: none;
+        font-size: 18px;
+        cursor: pointer;
+        border-radius: 6px;
+    }
+
+    .sub-btn:hover {
+        background: #ccc;
+    }
+
+    .img-box {
+        width: 100%;
+        height: 200px;
+        background: #ccc;
+        border: 2px dashed #999;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 18px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+    }
+
+    .topbar {
+        width: 100%;
+        height: 60px;
+        background: #590202;
+        display: flex;
+        align-items: center;
+        padding: 0 20px;
+        box-shadow: 0 2px 6px rgba(0,0,0,3);
+        font-size: 40px;
+        position: fixed;
+        top: 0;
+        left: 0;
+        z-index: 10;
+        color: white;
+        justify-content: center;
+        font-family: "Baskerville Old Face"; font-size: 50px; font-variant: small-caps; font-weight: 700; line-height: 15.4px;
+    }
+
+    .blood-drip {
+    width: 500px;
+    position: absolute;
+    bottom: 530px;
+    right: -250px;
+    transform: translateX(-50%);
+    pointer-events: none;
+    filter: drop-shadow(0 0 5px darkred);
+    }
+
+    .layer-title {
+    position: relative;
+    }
+
+    .splat{
+    width: 700px;
+    position: absolute;
+    bottom: 530px;
+    left: 100px;
+    transform: translateX(-50%);
+    pointer-events: none;
+    filter: drop-shadow(0 0 5px darkred);
+    }
+
+    .heart {
+    width: 450px;
+    position: fixed;
+    bottom:600px;
+    left: 400px;
+    transform: translateX(-50%);
+    pointer-events: none;
+    transition: transform 0.7s ease;
+    filter: drop-shadow(0 0 5px black);
+    }
+
+    .heart.enlarge {
+    transform: translateX(-50%) scale(1.7);
+    }
+
+    @keyframes heartbeat {
+    0%   { transform: translateX(-50%) scale(1) }
+    25%  { transform: translateX(-50%) scale(1.35)}
+    40%  { transform: translateX(-50%) scale(1.25)}
+    60%  { transform: translateX(-50%) scale(1.4) }
+    100% { transform: translateX(-50%) scale(1) }
+    }
+
+    .heart.beat {
+    animation: heartbeat 1s infinite ease-in-out;
+    filter: drop-shadow(0 0 25px darkred);
+    }
+
+
+    .shadow {
+    width: 350px;
+    position: fixed;
+    bottom: 530px;
+    left: 400px;
+    transform: translateX(-50%);
+    pointer-events: none;
+    }
+
+    .shadow.enlarge {
+    transform: translateX(-50%) translateY(50%) scale(1.7);
+    transition: transform 0.7s ease;
+    }
+
+
+    .eye {
+    width: 500px;
+    position: fixed;
+    bottom: 580px;
+    right: 100px;
+    pointer-events: none;
+    transition: transform 0.7s ease;
+    filter: drop-shadow(0 0 5px black);
+    }
+
+@keyframes rotateGlow {
+    0% {
+        transform: rotate(0deg);
+        filter: drop-shadow(0 0 5px red);
+    }
+    50% {
+        filter: drop-shadow(0 0 20px red);
+    }
+    100% {
+        transform: rotate(360deg);
+        filter: drop-shadow(0 0 5px red);
+    }
+}
+
+.eye.hovered {
+    animation: rotateGlow 1.5s linear infinite;
+}
+
+
+    .shadow2 {
+    width: 350px;
+    position: fixed;
+    bottom: 530px;
+    right: 0px;
+    transform: translateX(-50%);
+    pointer-events: none;
+    }
+
+    .shadow2.enlarge {
+    transform: translateX(-50%) translateY(50%) scale(2);
+    transition: transform 0.7s ease;
+    }
+
+    .flame{
+    width: 450px;
+    position: fixed;
+    bottom: -450px;
+    left: 200px;
+    transform: translateX(-50%);
+    pointer-events: none;
+    filter: drop-shadow(0 0 5px orange);
+    transition: transform 0.7s ease;
+    }
+
+    .flame.hovered{
+    transform: translateX(-50%) translateY(-400px) ;
+    }
+
+    .flame2{
+    width: 550px;
+    position: fixed;
+    bottom: -159px;
+    right: -300px;
+    transform: translateX(-50%);
+    pointer-events: none;
+    filter: drop-shadow(0 0 5px black);
+    transition: transform 0.7s ease;
+    }
+
+    .flame2.hovered{
+    transform: translateX(-50%) translateY(-50%) scale(3) ;
+    }
+
+
+</style>
+</head>
+
+<body>
+
+<img src="images/heart.png" class="heart">
+<img src="images/shadow.png" class="shadow">
+<img src="images/shadow.png" class="shadow2">
+<img src="images/eye.png" class="eye">
+<img src="images/flame.png" class="flame">
+<img src="images/flame2.png" class="flame2">
+
+<div class="topbar">` Behind those who enter shall void into nonexistence `</div>
+
+<div id="mapWrapper">
+
+    <img src="images/blood.png" class="blood-drip">
+    <img src="images/splat.png" class="splat">
+
+    <div class="layer" style="background: #555555;">
+
+    <div class="layer-title" onclick="openCircle(1)">Commit First Sin</div>
+    </div>
+
+    <div class="layer" style="background: #333333;">
+    <div class="layer-title" onclick="openCircle(2)">Commit Second Sin</div>
+    </div>
+
+    <div class="layer" style="background: #111111;">
+    <div class="layer-title" onclick="openCircle(3)">Commit Third Sin</div>
+
+</div>
+
+
+
+<div id="sidePanel1"></div>
+
+<div id="sidePanel2"></div>
+
+<script>
+const circles = {
+    1: {
+        title: "CHEATING",
+        description: "In the modern world, cheating has become one of the biggest sins due to its unjust, manipulative, and unfair nature. It is seen in relationships, academics, and work, portraying injustice and loss of respect towards others. Hence, this circle is divided into two rings to punish sinners to the full extent.",
+        image: "Image Placeholder",
+
+        subsections: [
+            {
+                title: "Casanova",
+                description: "Here lies the manipulators who deceive the hearts of others, whether in having multiple lovers or insincere reciprocation. The sinners race in an endless, speedy, and cylindrical slide of humongous blood vessels that bump up and down. They are cursed with a number of hearts (equal to how many people they loved romantically) protruding outside of their chests and must manually pump with their hands to maintain circulation. Should they stop, Eros massages and plays with their heart —— he squeezes, stretches, and fidgets with their unbreakable tickers. Their blood vessels are also extremely vasodilated, mercilessly cut by blades on the blood slide."
+            },
+            {
+                title: "Hermes",
+                description: "Here lies the keen-eyed who engage in academic, business-related, or work-related misconduct that allows them to have the upper hand among their peers. Thus, in this ring, their view of the world is upside down; their eyeballs are flipped to 180 degrees vertically and their heads are flipped 180 degrees horizontally. Their legs are also oriented backwards with every joint moving and folding in the wrong directions. While in this state, figures of their peers in the physical form of flames chases them, with the only exit being an endless staircase which they must climb."
+            }
+        ]
+    },
+
+    2: {
+        title: "Placeholder Circle 2 Title",
+        description: "Placeholder description for Circle 2",
+        image: "Image Placeholder"
+    },
+
+    3: {
+        title: "Placeholder Circle 3 Title",
+        description: "Placeholder description for Circle 3",
+        image: "Image Placeholder"
+    }
+};
+
+function openCircle(num) {
+    const panel = document.getElementById("sidePanel1");
+    const data = circles[num];
+
+    panel.innerHTML = `
+        <button class="close-btn" onclick="closePanel1()">Close ✕</button>
+        <h2>${data.title}</h2>
+        <div class="img-box">${data.image}</div>
+        <p>${data.description}</p>
+    `;
+
+    if (data.subsections) {
+        panel.innerHTML += `
+            <h3>Rings</h3>
+            ${data.subsections
+                .map(
+                    (sub, index) =>
+                        `<button class="sub-btn" onclick="openSubsection(${num}, ${index})">
+                            ${sub.title}
+                        </button>`
+                )
+                .join("")}
+        `;
+    }
+
+    panel.classList.add("open");
+}
+
+function openSubsection(circleNum, subIndex) {
+    const data = circles[circleNum].subsections[subIndex];
+    const subPanel = document.getElementById("sidePanel2");
+
+    subPanel.innerHTML = `
+        <button class="close-btn" onclick="closePanel2()">Close ✕</button>
+        <h2>${data.title}</h2>
+        <p>${data.description}</p>
+    `;
+
+    subPanel.classList.add("open");
+}
+
+function closePanel1() {
+    document.getElementById("sidePanel1").classList.remove("open");
+    closePanel2();
+}
+
+function closePanel2() {
+    document.getElementById("sidePanel2").classList.remove("open");
+}
+
+
+const layer1btn = document.querySelector('.layer:nth-of-type(1) .layer-title');
+const heart = document.querySelector('.heart');
+
+
+layer1btn.addEventListener('mouseenter', () => {
+    heart.classList.add('enlarge');
+    heart.classList.add('beat');
+});
+
+layer1btn.addEventListener('mouseleave', () => {
+    heart.classList.remove('enlarge');
+    heart.classList.remove('beat');
+});
+
+const shadow = document.querySelector('.shadow');
+
+layer1btn.addEventListener('mouseenter', () => {
+    shadow.classList.add('enlarge');
+});
+
+layer1btn.addEventListener('mouseleave', () => {
+    shadow.classList.remove('enlarge');
+});
+
+const shadow2 = document.querySelector('.shadow2');
+
+layer1btn.addEventListener('mouseenter', () => {
+    shadow2.classList.add('enlarge');
+});
+
+layer1btn.addEventListener('mouseleave', () => {
+    shadow2.classList.remove('enlarge');
+});
+//------------------------------------------
+const eye = document.querySelector('.eye');
+
+layer1btn.addEventListener('mouseenter', () => {
+    eye.classList.add('hovered'); // start rotation + glow
+});
+
+layer1btn.addEventListener('mouseleave', () => {
+    eye.classList.remove('hovered'); // stop rotation + glow
+});
+
+const flame = document.querySelector('.flame');
+
+layer1btn.addEventListener('mouseenter', () => {
+    flame.classList.add('hovered'); // start rotation + glow
+});
+
+layer1btn.addEventListener('mouseleave', () => {
+    flame.classList.remove('hovered'); // stop rotation + glow
+});
+
+const flame2 = document.querySelector('.flame2');
+
+layer1btn.addEventListener('mouseenter', () => {
+    flame2.classList.add('hovered'); // start rotation + glow
+});
+
+layer1btn.addEventListener('mouseleave', () => {
+    flame2.classList.remove('hovered'); // stop rotation + glow
+});
+
+document.querySelectorAll('.layer-title').forEach(title => {
+
+  title.addEventListener('pointerenter', () => {
+    const parent = title.closest('.layer');
+    if (parent) parent.classList.add('hovered');
+  });
+
+  title.addEventListener('pointerleave', () => {
+    const parent = title.closest('.layer');
+    if (parent) parent.classList.remove('hovered');
+  });
+});
+
+</script>
+
+</body>
+</html>
